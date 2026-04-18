@@ -1,0 +1,294 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35217.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file libshout-3.dll
+
+File Type: DLL
+
+  Section contains the following exports for libshout-3.dll
+
+    00000000 characteristics
+    69DBF053 time date stamp Sun Apr 12 22:19:47 2026
+        0.00 version
+           1 ordinal base
+         253 number of functions
+         253 number of names
+
+    ordinal hint RVA      name
+
+          1    0 0000D1E0 __copy_buffer
+          2    1 0000A010 _shout_avl_delete
+          3    2 00009F40 _shout_avl_get_by_index
+          4    3 00009FA0 _shout_avl_get_by_key
+          5    4 0000A5E0 _shout_avl_get_first
+          6    5 0000AC40 _shout_avl_get_item_by_key_least
+          7    6 0000ABA0 _shout_avl_get_item_by_key_most
+          8    7 0000A670 _shout_avl_get_next
+          9    8 0000A620 _shout_avl_get_prev
+         10    9 0000A7A0 _shout_avl_get_span_by_key
+         11    A 0000A990 _shout_avl_get_span_by_two_keys
+         12    B 00009AD0 _shout_avl_insert
+         13    C 0000A6C0 _shout_avl_iterate_index_range
+         14    D 0000A5C0 _shout_avl_iterate_inorder
+         15    E 000099C0 _shout_avl_node_new
+         16    F 0000AD50 _shout_avl_print_tree
+         17   10 00009A80 _shout_avl_tree_free
+         18   11 00009A00 _shout_avl_tree_new
+         19   12 0000ADD0 _shout_avl_tree_rlock
+         20   13 0000AE10 _shout_avl_tree_unlock
+         21   14 0000ADF0 _shout_avl_tree_wlock
+         22   15 0000ACE0 _shout_avl_verify
+         23   16 0000BE40 _shout_httpp_addref
+         24   17 0000B380 _shout_httpp_create_parser
+         25   18 0000BD90 _shout_httpp_get_param
+         26   19 0000B9A0 _shout_httpp_get_post_param
+         27   1A 0000B920 _shout_httpp_get_query_param
+         28   1B 0000B430 _shout_httpp_getvar
+         29   1C 0000B5E0 _shout_httpp_initialize
+         30   1D 0000C010 _shout_httpp_parse
+         31   1E 0000B490 _shout_httpp_parse_postdata
+         32   1F 0000B770 _shout_httpp_parse_response
+         33   20 0000BE60 _shout_httpp_release
+         34   21 0000B360 _shout_httpp_request_info
+         35   22 0000B980 _shout_httpp_set_post_param
+         36   23 0000B900 _shout_httpp_set_query_param
+         37   24 0000B5C0 _shout_httpp_setvar
+         38   25 00007A60 _shout_open_opus
+         39   26 00007C00 _shout_open_vorbis
+         40   27 000091E0 _shout_resolver_getip
+         41   28 00009100 _shout_resolver_getname
+         42   29 00009290 _shout_resolver_initialize
+         43   2A 000092D0 _shout_resolver_shutdown
+         44   2B 00008FD0 _shout_sock_accept
+         45   2C 00008690 _shout_sock_close
+         46   2D 00008BC0 _shout_sock_connect_non_blocking
+         47   2E 00008E00 _shout_sock_connect_wto
+         48   2F 00008C50 _shout_sock_connect_wto_bind
+         49   30 000089D0 _shout_sock_connected
+         50   31 00008370 _shout_sock_error
+         51   32 00008310 _shout_sock_get_localip
+         52   33 00008E10 _shout_sock_get_server_socket
+         53   34 000082C0 _shout_sock_initialize
+         54   35 00008F60 _shout_sock_listen
+         55   36 000088D0 _shout_sock_read_bytes
+         56   37 00008900 _shout_sock_read_line
+         57   38 00008390 _shout_sock_recoverable
+         58   39 00008550 _shout_sock_set_blocking
+         59   3A 00008380 _shout_sock_set_error
+         60   3B 00008650 _shout_sock_set_keepalive
+         61   3C 00008610 _shout_sock_set_nodelay
+         62   3D 000085D0 _shout_sock_set_nolinger
+         63   3E 00008F30 _shout_sock_set_send_buffer
+         64   3F 000082F0 _shout_sock_shutdown
+         65   40 000083E0 _shout_sock_stalled
+         66   41 00008430 _shout_sock_valid_socket
+         67   42 000088A0 _shout_sock_write
+         68   43 00008750 _shout_sock_write_bytes
+         69   44 000087D0 _shout_sock_write_fmt
+         70   45 00008780 _shout_sock_write_string
+         71   46 000086A0 _shout_sock_writev
+         72   47 0000DD70 _shout_thread_cond_broadcast_c
+         73   48 0000DD10 _shout_thread_cond_create_c
+         74   49 0000DD40 _shout_thread_cond_destroy
+         75   4A 0000DD60 _shout_thread_cond_signal_c
+         76   4B 0000DD80 _shout_thread_cond_timedwait_c
+         77   4C 0000DDE0 _shout_thread_cond_wait_c
+         78   4D 0000DB70 _shout_thread_create_c
+         79   4E 0000DF20 _shout_thread_exit_c
+         80   4F 0000DA60 _shout_thread_initialize
+         81   50 0000DFF0 _shout_thread_join
+         82   51 0000DFD0 _shout_thread_library_lock
+         83   52 0000DFE0 _shout_thread_library_unlock
+         84   53 0000DCD0 _shout_thread_mutex_create
+         85   54 0000DCE0 _shout_thread_mutex_destroy
+         86   55 0000DCF0 _shout_thread_mutex_lock_c
+         87   56 0000DD00 _shout_thread_mutex_unlock_c
+         88   57 0000DF90 _shout_thread_rename
+         89   58 0000DE10 _shout_thread_rwlock_create_c
+         90   59 0000DE20 _shout_thread_rwlock_destroy
+         91   5A 0000DE30 _shout_thread_rwlock_rlock_c
+         92   5B 0000DE50 _shout_thread_rwlock_unlock_c
+         93   5C 0000DE40 _shout_thread_rwlock_wlock_c
+         94   5D 0000DE80 _shout_thread_self
+         95   5E 0000DB10 _shout_thread_shutdown
+         96   5F 0000DE60 _shout_thread_sleep
+         97   60 00009310 _shout_timing_get_time
+         98   61 00009350 _shout_timing_sleep
+         99   62 000032F0 _shout_util_base64_encode
+        100   63 00003440 _shout_util_dict_free
+        101   64 00003490 _shout_util_dict_get
+        102   65 00003430 _shout_util_dict_new
+        103   66 000037B0 _shout_util_dict_next
+        104   67 000034F0 _shout_util_dict_set
+        105   68 000035D0 _shout_util_dict_urlencode
+        106   69 00003250 _shout_util_read_header
+        107   6A 00003230 _shout_util_strdup
+        108   6B 00003410 _shout_util_url_encode
+        109   6C 00003420 _shout_util_url_encode_resource
+        110   6D 0000B3F0 httpp_deletevar
+        111   6E 0000D3B0 httpp_encoding_addref
+        112   6F 0000D8C0 httpp_encoding_append_meta
+        113   70 0000D6E0 httpp_encoding_eof
+        114   71 0000D720 httpp_encoding_get_meta
+        115   72 0000D370 httpp_encoding_meta_append
+        116   73 0000D2A0 httpp_encoding_meta_free
+        117   74 0000D2F0 httpp_encoding_meta_new
+        118   75 0000D4D0 httpp_encoding_new
+        119   76 0000D890 httpp_encoding_pending
+        120   77 0000D590 httpp_encoding_read
+        121   78 0000D3D0 httpp_encoding_release
+        122   79 0000D740 httpp_encoding_write
+        123   7A 0000BD40 httpp_free_any_key
+        124   7B 0000BB30 httpp_get_any_key
+        125   7C 0000BA90 httpp_get_any_var
+        126   7D 0000BA00 httpp_get_param_var
+        127   7E 0000BEE0 httpp_str_to_method
+        128   7F 000084F0 inet_aton
+        129   80 000016C0 shout_cb_connection_callback
+        130   81 000018E0 shout_close
+        131   82 00004010 shout_connection__read
+        132   83 00004090 shout_connection__recoverable
+        133   84 00004050 shout_connection__write
+        134   85 000042C0 shout_connection_connect
+        135   86 000049D0 shout_connection_control
+        136   87 000041E0 shout_connection_disconnect
+        137   88 00004980 shout_connection_get_error
+        138   89 00004230 shout_connection_get_sendq
+        139   8A 000041C0 shout_connection_get_wait_timeout_happened
+        140   8B 000048C0 shout_connection_iter
+        141   8C 00003F10 shout_connection_new
+        142   8D 00003F80 shout_connection_ref
+        143   8E 000040C0 shout_connection_select_tlsmode
+        144   8F 000048F0 shout_connection_send
+        145   90 00004A70 shout_connection_set_callback
+        146   91 00004960 shout_connection_set_error
+        147   92 00004120 shout_connection_set_nonblocking
+        148   93 00004160 shout_connection_set_wait_timeout
+        149   94 00004250 shout_connection_starttls
+        150   95 000049A0 shout_connection_transfer_error
+        151   96 00003FA0 shout_connection_unref
+        152   97 00002A90 shout_control
+        153   98 00006060 shout_create_icy_request
+        154   99 00005D80 shout_create_xaudiocast_request
+        155   9A 00001B40 shout_delay
+        156   9B 00001760 shout_free
+        157   9C 00002080 shout_get_agent
+        158   9D 000029C0 shout_get_allowed_ciphers
+        159   9E 00002280 shout_get_audio_info
+        160   9F 00002860 shout_get_ca_directory
+        161   A0 00002910 shout_get_ca_file
+        162   A1 00002A70 shout_get_client_certificate
+        163   A2 00001D10 shout_get_connected
+        164   A3 00002650 shout_get_content_format
+        165   A4 00002180 shout_get_content_language
+        166   A5 00002D20 shout_get_description
+        167   A6 00002C90 shout_get_dumpfile
+        168   A7 00001BE0 shout_get_errno
+        169   A8 00001BF0 shout_get_error
+        170   A9 00002BE0 shout_get_format
+        171   AA 00002D00 shout_get_genre
+        172   AB 00001DD0 shout_get_host
+        173   AC 00002530 shout_get_meta
+        174   AD 000025C0 shout_get_mimetype_from_self
+        175   AE 00001FD0 shout_get_mount
+        176   AF 00002CC0 shout_get_name
+        177   B0 00002770 shout_get_nonblocking
+        178   B1 00001EE0 shout_get_password
+        179   B2 00001E30 shout_get_port
+        180   B3 000026F0 shout_get_protocol
+        181   B4 000025A0 shout_get_public
+        182   B5 000027C0 shout_get_tls
+        183   B6 00002CE0 shout_get_url
+        184   B7 00002230 shout_get_user
+        185   B8 00005D20 shout_get_xaudiocast_response
+        186   B9 0001E010 shout_http_impl
+        187   BA 0001E030 shout_icy_impl
+        188   BB 00001700 shout_init
+        189   BC 00003100 shout_metadata_add
+        190   BD 000030E0 shout_metadata_free
+        191   BE 000030D0 shout_metadata_new
+        192   BF 00002380 shout_new
+        193   C0 00001850 shout_open
+        194   C1 00007680 shout_open_mp3
+        195   C2 00006AB0 shout_open_ogg
+        196   C3 00007730 shout_open_text
+        197   C4 00007130 shout_open_webm
+        198   C5 00005F60 shout_parse_xaudiocast_response
+        199   C6 00003A60 shout_queue_collect
+        200   C7 00003820 shout_queue_data
+        201   C8 00003A20 shout_queue_free
+        202   C9 00003950 shout_queue_printf
+        203   CA 00003920 shout_queue_str
+        204   CB 00001AB0 shout_queuelen
+        205   CC 0001E040 shout_roaraudio_impl
+        206   CD 00001980 shout_send
+        207   CE 00001A30 shout_send_raw
+        208   CF 00001FF0 shout_set_agent
+        209   D0 00002930 shout_set_allowed_ciphers
+        210   D1 00002250 shout_set_audio_info
+        211   D2 000027D0 shout_set_ca_directory
+        212   D3 00002880 shout_set_ca_file
+        213   D4 00002B10 shout_set_callback
+        214   D5 000029E0 shout_set_client_certificate
+        215   D6 000025D0 shout_set_content_format
+        216   D7 000020A0 shout_set_content_language
+        217   D8 00002D10 shout_set_description
+        218   D9 00002C10 shout_set_dumpfile
+        219   DA 00002B40 shout_set_format
+        220   DB 00002CF0 shout_set_genre
+        221   DC 00001D50 shout_set_host
+        222   DD 000022A0 shout_set_meta
+        223   DE 00003120 shout_set_metadata
+        224   DF 00003130 shout_set_metadata_utf8
+        225   E0 00001F00 shout_set_mount
+        226   E1 00002CB0 shout_set_name
+        227   E2 00002710 shout_set_nonblocking
+        228   E3 00001E50 shout_set_password
+        229   E4 00001DF0 shout_set_port
+        230   E5 00002690 shout_set_protocol
+        231   E6 00002550 shout_set_public
+        232   E7 00002790 shout_set_tls
+        233   E8 00002CD0 shout_set_url
+        234   E9 000021A0 shout_set_user
+        235   EA 00001730 shout_shutdown
+        236   EB 00001AD0 shout_sync
+        237   EC 00008030 shout_tls_close
+        238   ED 000080E0 shout_tls_get_peer_certificate
+        239   EE 000081A0 shout_tls_get_peer_certificate_chain
+        240   EF 00007D10 shout_tls_new
+        241   F0 00008070 shout_tls_read
+        242   F1 000080B0 shout_tls_recoverable
+        243   F2 00008290 shout_tls_set_callback
+        244   F3 00007D80 shout_tls_try_connect
+        245   F4 00008090 shout_tls_write
+        246   F5 00001BB0 shout_version
+        247   F6 0001E020 shout_xaudiocast_impl
+        248   F7 00008470 sock_active
+        249   F8 00008AD0 sock_try_connection
+        250   F9 0000E040 thread_spin_create
+        251   FA 0000E060 thread_spin_destroy
+        252   FB 0000E070 thread_spin_lock
+        253   FC 0000E090 thread_spin_unlock
+
+  Summary
+
+        1000 .bss
+        1000 .data
+        5000 .debug_abbrev
+        1000 .debug_aranges
+        2000 .debug_frame
+       1B000 .debug_info
+        F000 .debug_line
+        3000 .debug_line_str
+       14000 .debug_loclists
+        1000 .debug_rnglists
+        1000 .debug_str
+        2000 .edata
+        2000 .idata
+        2000 .pdata
+        3000 .rdata
+        1000 .reloc
+       1D000 .text
+        1000 .tls
+        2000 .xdata

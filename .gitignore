@@ -1,0 +1,8 @@
+# Directories
+.vs/
+out/
+packages/
+
+# Files
+*.user
+CMakeSettings.json
