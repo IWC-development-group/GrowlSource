@@ -5,6 +5,16 @@
 #include <iostream>
 #include <cstdio>
 
+const char* connectionStatusString(ConnectionStatus status) {
+	switch (status) {
+	case ConnectionStatus::DISCONNECTED: return "DISCONNECTED";
+	case ConnectionStatus::CONNECTING: return "CONNECTING";
+	case ConnectionStatus::CONNECTED: return "CONNECTED";
+	case ConnectionStatus::STREAMING: return "STREAMING";
+	case ConnectionStatus::FAILED: return "FAILED";
+	}
+}
+
 Session::Session()
 	: currentIndex(0), shout(nullptr), connectionStatus(ConnectionStatus::DISCONNECTED) {
 	shout = shout_new();
@@ -48,6 +58,7 @@ void Session::setup() {
 		if (ret != SHOUTERR_SUCCESS) {
 			std::println(stderr, "shout_open failed: {} (code: {})", shout_get_error(shout), ret);
 			connectionStatus.store(ConnectionStatus::FAILED);
+			shout_close(shout);
 			return TaskStatus::ERROR;
 		}
 
@@ -91,6 +102,7 @@ void Session::setup() {
 	worker.onCommand<CMD_NEXT_TRACK, NextTrackCommand>([this](NextTrackCommand* command) -> TaskStatus {
 		std::lock_guard<std::mutex> lock(worker.getMutex());
 		
+		//std::println("Track list size: {}", tracks.size());
 		if (!tracks.empty()) {
 			currentIndex.store((currentIndex.load() + 1) % tracks.size()); // !!!
 		}
@@ -116,7 +128,10 @@ void Session::nextTrack() {
 }
 
 void Session::playCurrent() {
-	worker.submit(std::make_unique<StreamTrackCommand>(shout, getCurrentTrack()));
+	Track& track = getCurrentTrack();
+	if (track.path.empty()) return;
+
+	worker.submit(std::make_unique<StreamTrackCommand>(shout, track));
 }
 
 void Session::editTrack(int trackIndex, const Track& track) {
@@ -161,4 +176,9 @@ void Session::eachTrack(const std::function<void(int, Track&)>& func) {
 	for (int i = 0; i < tracks.size(); i++) {
 		func(i, tracks[i]);
 	}
+}
+
+bool Session::isListEmpty() {
+	std::lock_guard<std::mutex> lock(worker.getMutex());
+	return tracks.empty();
 }

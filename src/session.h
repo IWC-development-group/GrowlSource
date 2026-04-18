@@ -55,6 +55,8 @@ enum class ConnectionStatus : uint8_t {
 	FAILED
 };
 
+const char* connectionStatusString(ConnectionStatus status);
+
 class Session {
 private:
 	CommandWorker worker;
@@ -76,9 +78,11 @@ public:
 	void setup();
 	void eachTrack(const std::function<void(int, Track&)>& func);
 
+	int getCurrentTrackIndex() const { return currentIndex.load(); };
 	Track& getCurrentTrack();
 	Track& getTrack(int trackIndex);
 
+	bool isListEmpty();
 	bool isOnFirstTrack() const { return currentIndex == 0; }
 	ConnectionStatus getConnectionStatus() const { return connectionStatus.load(); }
 };

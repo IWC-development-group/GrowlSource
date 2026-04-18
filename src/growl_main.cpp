@@ -203,6 +203,11 @@ public:
 			if (ImGui::Button("Connect")) {
 				clientConnects.fire(connection);
 			}
+
+			ImGui::Separator();
+			ImGui::Text("Connection status: %s", connectionStatusString(session.getConnectionStatus()));
+			ImGui::Text("Current track: %d", session.getCurrentTrackIndex());
+
 			ImGui::EndChild();
 		}
 
@@ -244,6 +249,8 @@ public:
 	}
 
 	void onUpdate() override {
+		if (session.isListEmpty()) return;
+
 		ConnectionStatus status = session.getConnectionStatus();
 		if (status != ConnectionStatus::STREAMING && status == ConnectionStatus::CONNECTED) {
 			session.playCurrent();
