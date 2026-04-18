@@ -51,9 +51,23 @@ private:
 	Connection connection;
 	int selectedIndex;
 
+	static void dropCallback(GLFWwindow* window, int pathCount, const char* paths[]) {
+		TrackAddedEvent* event = (TrackAddedEvent*)glfwGetWindowUserPointer(window);
+
+		for (int i = 0; i < pathCount; i++) {
+			Track track;
+			track.path = paths[i];
+			event->fire(track);
+		}
+	}
+
 public:
 	UiLayer(Session& _session, const TrackAddedEvent& added, const ConnectionEvent& connects)
 		: session(_session), selectedIndex(-1), trackAdded(added), clientConnects(connects) {
+
+		GLFWwindow* window = Application::current()->getWindow();
+		glfwSetWindowUserPointer(window, &trackAdded);
+		glfwSetDropCallback(window, dropCallback);
 
 		trackEdited.onEvent([this](int seletedIndex, const Track& track) {
 			session.editTrack(seletedIndex, track);
@@ -65,6 +79,8 @@ public:
 		connection.username = "source";
 		connection.password = "123456";
 	}
+
+	TrackAddedEvent& getTrackAddedEvent() { return trackAdded; }
 
 	void setCurrentTrack(Track& track) {
 		this->track = track;
