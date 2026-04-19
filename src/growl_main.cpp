@@ -186,7 +186,10 @@ public:
 				ImGui::PushID(index);
 
 				bool isSelected = (index == selectedIndex);
-				if (ImGui::Selectable(track.path.c_str(), isSelected)) {
+				if (!isSelected && index == session.getCurrentTrackIndex()) {
+					ImGui::Selectable(track.path.c_str(), false, ImGuiSelectableFlags_Highlight);
+				}
+				else if (ImGui::Selectable(track.path.c_str(), isSelected)) {
 					selectedIndex = index;
 				}
 
