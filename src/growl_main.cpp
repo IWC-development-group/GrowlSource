@@ -112,6 +112,29 @@ public:
 		this->track = track;
 	}
 
+	void showMenuBar() {
+		bool addTrackOpened = false, editTrackOpened = false;
+
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Add track")) addTrackOpened = true;
+				if (ImGui::MenuItem("Edit track", nullptr, false, selectedIndex != -1)) {
+					editTrackOpened = true;
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+
+		if (addTrackOpened) {
+			ImGui::OpenPopup("Add track");
+		}
+		if (editTrackOpened) {
+			track = session.getTrack(selectedIndex);
+			ImGui::OpenPopup("Edit track");
+		}
+	}
+
 	void showTrackForm(Track& track) {
 		ImGui::InputText("Path", &track.path);
 		ImGui::InputText("Name", &track.name);
@@ -120,8 +143,6 @@ public:
 	}
 
 	void showConnectionForm(Connection& connection) {
-		//std::u8string text = u8"“≈ —“";
-		//ImGui::Text((const char*)text.c_str());
 		ImGui::Text("hostname");
 		ImGui::InputText("##hostname", &connection.ip);
 		
@@ -226,24 +247,16 @@ public:
 
 			ImGui::EndChild();
 
-			if (ImGui::Button("Add")) {
-				ImGui::OpenPopup("Add track");
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Edit") && selectedIndex != -1) {
-				track = session.getTrack(selectedIndex);
-				ImGui::OpenPopup("Edit track");
-			}
-
-			processAdditionModal();
-			processEditModal();
-
 			ImGui::TableSetColumnIndex(1);
 			ImGui::Text("Connection");
 
-			ImGui::BeginChild("ConnectionArea", ImVec2(avail.x, scrollHeight), true);
+			ImGui::BeginChild("ConnectionArea", ImVec2(0, scrollHeight), true);
+			
+			avail = ImGui::GetContentRegionAvail();
+			ImGui::PushItemWidth(avail.x);
 			showConnectionForm(connection);
+			ImGui::PopItemWidth();
+
 			if (ImGui::Button("Connect")) {
 				clientConnects.fire(connection);
 			}
@@ -254,6 +267,10 @@ public:
 
 			ImGui::EndChild();
 		}
+
+		showMenuBar();
+		processAdditionModal();
+		processEditModal();
 
 		ImGui::EndTable();
 		ImGui::End();
