@@ -57,7 +57,7 @@ private:
 
 		for (int i = 0; i < pathCount; i++) {
 			Track track;
-			track.path = sconv::utf8ToCp1251(paths[i]);
+			track.path = (paths[i]);
 			event->fire(track);
 		}
 	}
@@ -278,7 +278,7 @@ public:
 		TrackAddedEvent trackAdded;
 
 		trackAdded.onEvent([this](const Track& track) {
-			std::println("Adding {}", track.toString());
+			std::println("Adding new track!");
 			session.addTrack(track);
 		});
 

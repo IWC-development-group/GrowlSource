@@ -1,5 +1,6 @@
 #include "session.h"
 #include "application.h"
+#include "string_converting.h"
 
 #include <print>
 #include <iostream>
@@ -159,14 +160,15 @@ Track& Session::getTrack(int trackIndex) {
 }
 
 FILE* Session::openTrack(const Track& track) {
-	if (track.path.empty()) {
+	std::string path = sconv::utf8ToCp1251(track.path);
+	if (path.empty()) {
 		std::println("Can't open track: Path is empty!");
 		return nullptr;
 	}
 
 	FILE* f = nullptr;
 
-	if (fopen_s(&f, track.path.c_str(), "rb") != 0 || !f) {
+	if (fopen_s(&f, path.c_str(), "rb") != 0 || !f) {
 		std::println("Can't open track: {}", track.path);
 		return nullptr;
 	}
