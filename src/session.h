@@ -81,6 +81,7 @@ public:
 	int getCurrentTrackIndex() const { return currentIndex.load(); };
 	Track& getCurrentTrack();
 	Track& getTrack(int trackIndex);
+	CommandWorker& getWorker() { return worker; }
 
 	bool isListEmpty();
 	bool isOnFirstTrack() const { return currentIndex == 0; }

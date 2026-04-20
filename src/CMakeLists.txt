@@ -19,6 +19,7 @@ add_executable(growl ${SOURCES}) # !!!
 set_target_properties(growl PROPERTIES CXX_STANDARD 23)
 
 set(LIBSHOUT_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/libshout")
+set(RESOURCES_ROOT "${CMAKE_SOURCE_DIR}/res")
 
 target_include_directories(growl PRIVATE "${LIBSHOUT_ROOT}/include")
 
@@ -40,5 +41,11 @@ target_link_libraries(growl PRIVATE
 add_custom_command(TARGET growl POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${LIBSHOUT_ROOT}/bin/"
+        $<TARGET_FILE_DIR:growl>
+)
+
+add_custom_command(TARGET growl POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${RESOURCES_ROOT}"
         $<TARGET_FILE_DIR:growl>
 )

@@ -10,41 +10,36 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#endif
 
-std::string ConvertCP1251ToUTF8(const std::string& str)
-{
+std::string ConvertCP1251ToUTF8(const std::string& str) {
 	int len = MultiByteToWideChar(1251, 0, str.c_str(), -1, NULL, 0);
-	wchar_t* wstr = new wchar_t[len];
-	MultiByteToWideChar(1251, 0, str.c_str(), -1, wstr, len);
+	std::vector<wchar_t> wstr(len);
+	MultiByteToWideChar(1251, 0, str.c_str(), -1, &wstr[0], len);
 
-	len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, 0, 0);
-	char* utf8 = new char[len];
-	WideCharToMultiByte(CP_UTF8, 0, wstr, -1, utf8, len, 0, 0);
+	len = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], -1, NULL, 0, 0, 0);
 
-	std::string result(utf8);
-	delete[] wstr;
-	delete[] utf8;
+	std::string utf8; utf8.resize(len - 1);
+	WideCharToMultiByte(CP_UTF8, 0, wstr.data(), -1, &utf8[0], len, NULL, NULL);
 
-	return result;
+	return utf8;
 }
 
-std::string ConvertUTF8ToCP1251(const std::string& str)
-{
+std::string ConvertUTF8ToCP1251(const std::string& str) {
 	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-	wchar_t* wstr = new wchar_t[len];
-	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, len);
+	std::vector<wchar_t> wstr(len);
+	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], len);
 
-	len = WideCharToMultiByte(1251, 0, wstr, -1, NULL, 0, NULL, NULL);
-	char* cp1251 = new char[len];
-	WideCharToMultiByte(1251, 0, wstr, -1, cp1251, len, NULL, NULL);
+	len = WideCharToMultiByte(1251, 0, &wstr[0], -1, NULL, 0, NULL, NULL);
 
-	std::string result(cp1251);
-	delete[] wstr;
-	delete[] cp1251;
+	std::string cp1251; cp1251.resize(len - 1);
+	WideCharToMultiByte(1251, 0, wstr.data(), -1, &cp1251[0], len, NULL, NULL);
 
-	return result;
+	return cp1251;
 }
+#else
+std::string ConvertCP1251ToUTF8(const std::string& str) { return str; }
+std::string ConvertUTF8ToCP1251(const std::string& str) { return str; }
+#endif
 
 class TrackAddedEvent : public Event<const Track&> {
 public:
@@ -99,6 +94,28 @@ private:
 		}
 	}
 
+	void loadFont(const std::string& filename) {
+		ImGuiIO& io = ImGui::GetIO();
+		ImFontConfig config;
+		config.OversampleH = 1;
+		config.OversampleV = 1;
+		config.PixelSnapH = true;
+
+		ImFont* font = io.Fonts->AddFontFromFileTTF(
+			filename.c_str(),
+			14.0f,
+			&config,
+			io.Fonts->GetGlyphRangesCyrillic()
+		);
+
+		if (font) {
+			std::println("Loaded font: {}", filename);
+		}
+		else {
+			std::println(stderr, "Can't load font: {}", filename);
+		}
+	}
+
 public:
 	UiLayer(Session& _session, const TrackAddedEvent& added, const ConnectionEvent& connects)
 		: session(_session), selectedIndex(-1), trackAdded(added), clientConnects(connects) {
@@ -116,6 +133,9 @@ public:
 		connection.mount = "/test.mp3";
 		connection.username = "source";
 		connection.password = "123456";
+
+		loadFont("fonts/terminus.ttf");
+		//ImGui::GetIO().Fonts->Build();
 	}
 
 	TrackAddedEvent& getTrackAddedEvent() { return trackAdded; }
@@ -132,6 +152,8 @@ public:
 	}
 
 	void showConnectionForm(Connection& connection) {
+		//std::u8string text = u8"“≈ —“";
+		//ImGui::Text((const char*)text.c_str());
 		ImGui::Text("hostname");
 		ImGui::InputText("##hostname", &connection.ip);
 		
@@ -245,9 +267,6 @@ public:
 				track = session.getTrack(selectedIndex);
 				ImGui::OpenPopup("Edit track");
 			}
-
-			//ImGui::SameLine();
-			//ImGui::Button("Delete");
 
 			processAdditionModal();
 			processEditModal();
