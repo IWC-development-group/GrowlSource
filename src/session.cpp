@@ -70,12 +70,14 @@ void Session::setup() {
 	worker.onCommand<CMD_STREAM_TRACK, StreamTrackCommand>([this](StreamTrackCommand* command) -> TaskStatus {
 		if (connectionStatus.load() != ConnectionStatus::CONNECTED) {
 			std::println(stderr, "Not connected! Can't start streaming.");
+			setPlayRequested(false);
 			return TaskStatus::COMPLETED;
 		}
 
 		FILE* f = openTrack(command->getTrack());
 		if (!f) {
 			std::println(stderr, "Can't open track!");
+			setPlayRequested(false);
 			return TaskStatus::COMPLETED;
 		}
 
@@ -95,6 +97,7 @@ void Session::setup() {
 		}
 
 		fclose(f);
+		setPlayRequested(false);
 		connectionStatus.store(ConnectionStatus::CONNECTED);
 		return TaskStatus::COMPLETED;
 	});

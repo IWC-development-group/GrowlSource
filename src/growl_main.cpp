@@ -328,9 +328,11 @@ public:
 		if (session.isListEmpty()) return;
 
 		ConnectionStatus status = session.getConnectionStatus();
-		if (status != ConnectionStatus::STREAMING && status == ConnectionStatus::CONNECTED) {
+		if (status == ConnectionStatus::CONNECTED && !session.isPlayRequested()) {
+			std::println("Requesting next track!");
 			session.playCurrent();
 			session.nextTrack();
+			session.setPlayRequested(true);
 		}
 	}
 };

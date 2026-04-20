@@ -64,6 +64,7 @@ private:
 	shout_t* shout; // !!!
 	std::atomic<int> currentIndex;
 	std::atomic<ConnectionStatus> connectionStatus;
+	std::atomic<bool> playRequested;
 
 public:
 	Session();
@@ -77,6 +78,7 @@ public:
 	void editTrack(int trackIndex, const Track& track);
 	void setup();
 	void eachTrack(const std::function<void(int, Track&)>& func);
+	void setPlayRequested(bool playRequested) { return this->playRequested.store(playRequested); }
 
 	int getCurrentTrackIndex() const { return currentIndex.load(); };
 	Track& getCurrentTrack();
@@ -85,5 +87,6 @@ public:
 
 	bool isListEmpty();
 	bool isOnFirstTrack() const { return currentIndex == 0; }
+	bool isPlayRequested() const { return playRequested.load(); }
 	ConnectionStatus getConnectionStatus() const { return connectionStatus.load(); }
 };
