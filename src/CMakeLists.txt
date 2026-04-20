@@ -13,7 +13,7 @@ set(SOURCES
     layer_stack.cpp
     instances.cpp
     session.cpp
- "event_worker.cpp")
+ "event_worker.cpp" "string_converting.cpp")
 
 add_executable(growl ${SOURCES}) # !!!
 set_target_properties(growl PROPERTIES CXX_STANDARD 23)

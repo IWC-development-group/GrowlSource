@@ -3,43 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <print>
 
+#include "string_converting.h"
 #include "application.h"
 #include "event.h"
 #include "session.h"
 #include "instances.h"
-
-#ifdef _WIN32
-#include <windows.h>
-
-std::string ConvertCP1251ToUTF8(const std::string& str) {
-	int len = MultiByteToWideChar(1251, 0, str.c_str(), -1, NULL, 0);
-	std::vector<wchar_t> wstr(len);
-	MultiByteToWideChar(1251, 0, str.c_str(), -1, &wstr[0], len);
-
-	len = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], -1, NULL, 0, 0, 0);
-
-	std::string utf8; utf8.resize(len - 1);
-	WideCharToMultiByte(CP_UTF8, 0, wstr.data(), -1, &utf8[0], len, NULL, NULL);
-
-	return utf8;
-}
-
-std::string ConvertUTF8ToCP1251(const std::string& str) {
-	int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-	std::vector<wchar_t> wstr(len);
-	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], len);
-
-	len = WideCharToMultiByte(1251, 0, &wstr[0], -1, NULL, 0, NULL, NULL);
-
-	std::string cp1251; cp1251.resize(len - 1);
-	WideCharToMultiByte(1251, 0, wstr.data(), -1, &cp1251[0], len, NULL, NULL);
-
-	return cp1251;
-}
-#else
-std::string ConvertCP1251ToUTF8(const std::string& str) { return str; }
-std::string ConvertUTF8ToCP1251(const std::string& str) { return str; }
-#endif
 
 class TrackAddedEvent : public Event<const Track&> {
 public:
@@ -89,7 +57,7 @@ private:
 
 		for (int i = 0; i < pathCount; i++) {
 			Track track;
-			track.path = ConvertUTF8ToCP1251(paths[i]);
+			track.path = sconv::utf8ToCp1251(paths[i]);
 			event->fire(track);
 		}
 	}
@@ -338,13 +306,7 @@ public:
 };
 
 int main() {
-#ifdef _WIN32
-	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
-#else
-	setlocale(LC_ALL, "ru_RU.UTF-8");
-#endif
-
+	sconv::setProperEncoding();
 	Application* growlApp = new Growl();
 	growlApp->run(64);
 	delete growlApp;
