@@ -2,6 +2,7 @@
 
 #include "growl.h"
 #include "custom_events.h"
+#include "demo_layer.h"
 #include "ui_layer.h"
 
 Growl::Growl() : Application("Growl", 854, 480) {
@@ -20,6 +21,7 @@ Growl::Growl() : Application("Growl", 854, 480) {
 	});
 
 	gui = layers().attach<UiLayer>(session, trackAdded, clientConnects);
+	layers().attach<DemoLayer>();
 }
 
 void Growl::onUpdate() {

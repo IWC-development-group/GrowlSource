@@ -27,7 +27,7 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 	playlistSaved.onEvent([this](void* _browser) {
 		auto* browser = (ImGui::FileBrowser*)_browser;
 		if (browser->HasSelected()) {
-			currentPlaylistPath = browser->GetSelected().string() + GR_PLAYLIST_EXTENSION;
+			currentPlaylistPath = browser->GetSelected().string() + GR_PLAYLIST_EXTENSION; // !!!
 		}
 		session.savePlaylist(currentPlaylistPath);
 	});
@@ -66,8 +66,7 @@ void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[
 	TrackAddedEvent* event = (TrackAddedEvent*)glfwGetWindowUserPointer(window);
 
 	for (int i = 0; i < pathCount; i++) {
-		Track track;
-		track.path = (paths[i]);
+		Track track(paths[i]);
 		event->fire(track);
 	}
 }
@@ -117,22 +116,25 @@ void UiLayer::showMenuBar() {
 
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Add track")) addTrackOpened = true;
-			if (ImGui::MenuItem("Edit track", nullptr, false, selectedIndex != -1)) {
-				editTrackOpened = true;
-			}
+			if (ImGui::MenuItem("Open playlist", "Ctrl+O")) fileBrowserOpenedToLoad = true;
 			if (ImGui::MenuItem("Save playlist", "Ctrl+S")) currentPlaylistSaved = true;
 			if (ImGui::MenuItem("Save playlist as", "Ctrl+Shift+S")) fileBrowserOpenedToSave = true;
-			if (ImGui::MenuItem("Open playlist", "Ctrl+O")) fileBrowserOpenedToLoad = true;
+			ImGui::Separator();
+			if (ImGui::MenuItem("Add track", "Ctrl+N")) addTrackOpened = true;
+			if (ImGui::MenuItem("Edit track", "Ctrl+E", false, selectedIndex != -1)) {
+				editTrackOpened = true;
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
 	}
 
-	if (addTrackOpened) {
+	if (addTrackOpened || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_N)) {
 		ImGui::OpenPopup("Add track");
 	}
-	if (editTrackOpened) {
+	if (editTrackOpened ||
+		ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_E) &&
+		selectedIndex != -1) {
 		track = session.getTrack(selectedIndex);
 		ImGui::OpenPopup("Edit track");
 	}
