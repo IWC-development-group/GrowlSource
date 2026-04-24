@@ -8,11 +8,18 @@
 #define GR_PLAYLIST_EXTENSION		".gtl"
 
 UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const ConnectionEvent& connects)
-	: session(_session), selectedIndex(-1), trackAdded(added), clientConnects(connects) {
+	: events(((Growl*)Application::current())->getEventManager()),
+	session(_session), selectedIndex(-1) {
+
+	TrackAddedEvent trackAdded;
+	TrackEditedEvent trackEdited;
+	ConnectionEvent clientConnects;
+	PlaylistManageEvent playlistSelected, playlistSaved;
 
 	GLFWwindow* window = Application::current()->getWindow();
-	glfwSetWindowUserPointer(window, &trackAdded);
+	//glfwSetWindowUserPointer(window, &trackAdded);
 	glfwSetDropCallback(window, dropCallback);
+
 
 	trackEdited.onEvent([this](int seletedIndex, const Track& track) {
 		session.editTrack(seletedIndex, track);
@@ -32,6 +39,10 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 		session.savePlaylist(currentPlaylistPath);
 	});
 
+	events.add<"EVT_TRACK_EDITED">(trackEdited);
+	events.add<"EVT_PLAYLIST_SELECTED">(playlistSelected);
+	events.add<"EVT_PLAYLIST_SAVED">(playlistSaved);
+
 	connection.ip = "26.70.26.159";
 	connection.port = 8000;
 	connection.mount = "/test.mp3";
@@ -50,7 +61,7 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 
 void UiLayer::callPlaylistSave() {
 	if (currentPlaylistPath.empty()) saveBrowser.Open();
-	else playlistSaved.fire((void*)&saveBrowser);
+	else events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SAVED">((void*)&saveBrowser);
 	std::println("Playlist saving called");
 }
 
@@ -63,7 +74,8 @@ void UiLayer::callPlaylistOpen() {
 }
 
 void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[]) {
-	TrackAddedEvent* event = (TrackAddedEvent*)glfwGetWindowUserPointer(window);
+	EventManager& events = ((Growl*)Application::current())->getEventManager();
+	auto* event = events.get<TrackAddedEvent, "EVT_TRACK_ADDED">();
 
 	for (int i = 0; i < pathCount; i++) {
 		Track track(paths[i]);
@@ -150,11 +162,11 @@ void UiLayer::showMenuBar() {
 	saveBrowser.Display();
 
 	if (loadBrowser.HasSelected()) {
-		playlistSelected.fire((void*)&loadBrowser);
+		events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SELECTED">((void*)&loadBrowser);
 		loadBrowser.ClearSelected();
 	}
 	if (saveBrowser.HasSelected()) {
-		playlistSaved.fire((void*)&saveBrowser);
+		events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SAVED">((void*)&loadBrowser);
 		saveBrowser.ClearSelected();
 	}
 }
@@ -191,7 +203,7 @@ void UiLayer::processAdditionModal() {
 		showTrackForm(track);
 
 		if (ImGui::Button("OK")) {
-			trackAdded.fire(track);
+			events.fire<TrackAddedEvent, "EVT_TRACK_ADDED">(track);
 			track.clear();
 			ImGui::CloseCurrentPopup();
 		}
@@ -209,7 +221,7 @@ void UiLayer::processEditModal() {
 		showTrackForm(track);
 
 		if (ImGui::Button("OK")) {
-			trackEdited.fire(selectedIndex, track);
+			events.fire<TrackEditedEvent, "EVT_TRACK_EDITED">(selectedIndex, track);
 			track.clear();
 			ImGui::CloseCurrentPopup();
 		}
@@ -282,7 +294,7 @@ void UiLayer::onUpdate() {
 		ImGui::PopItemWidth();
 
 		if (ImGui::Button("Connect")) {
-			clientConnects.fire(connection);
+			events.fire<ConnectionEvent, "EVT_CONNECTION">(connection);
 		}
 
 		ImGui::Separator();
