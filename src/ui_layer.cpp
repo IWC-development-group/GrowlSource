@@ -13,11 +13,10 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 	GLFWwindow* window = Application::current()->getWindow();
 	glfwSetWindowUserPointer(window, &trackAdded);
 	glfwSetDropCallback(window, dropCallback);
-	glfwSetKeyCallback(window, hotkeyCallback);
 
 	trackEdited.onEvent([this](int seletedIndex, const Track& track) {
 		session.editTrack(seletedIndex, track);
-		});
+	});
 
 	playlistSelected.onEvent([this](void* _browser) {
 		auto* browser = (ImGui::FileBrowser*)_browser;
@@ -70,20 +69,6 @@ void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[
 		Track track;
 		track.path = (paths[i]);
 		event->fire(track);
-	}
-}
-
-void UiLayer::hotkeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (mods & GLFW_MOD_CONTROL && action == GLFW_PRESS) {
-		UiLayer* layer = ((Growl*)Application::current())->getUiLayer();
-
-		if (key == GLFW_KEY_S) {
-			if (mods & GLFW_MOD_SHIFT) layer->callPlaylistSaveAs();
-			else layer->callPlaylistSave();
-		}
-		else if (key == GLFW_KEY_O) {
-			layer->callPlaylistOpen();
-		}
 	}
 }
 
@@ -151,9 +136,13 @@ void UiLayer::showMenuBar() {
 		track = session.getTrack(selectedIndex);
 		ImGui::OpenPopup("Edit track");
 	}
-	if (currentPlaylistSaved) callPlaylistSave();
-	if (fileBrowserOpenedToLoad) callPlaylistOpen();
-	if (fileBrowserOpenedToSave) callPlaylistSaveAs();
+
+	if (currentPlaylistSaved || 
+		ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_S)) callPlaylistSave();
+	if (fileBrowserOpenedToLoad ||
+		ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_O)) callPlaylistOpen();
+	if (fileBrowserOpenedToSave ||
+		ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_S)) callPlaylistSaveAs();
 
 	loadBrowser.Display();
 	saveBrowser.Display();
