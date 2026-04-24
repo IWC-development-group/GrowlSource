@@ -79,6 +79,8 @@ public:
 	void setup();
 	void eachTrack(const std::function<void(int, Track&)>& func);
 	void setPlayRequested(bool playRequested) { return this->playRequested.store(playRequested); }
+	bool loadPlaylistFromFile(const std::string& path);
+	void savePlaylist(const std::string& path);
 
 	int getCurrentTrackIndex() const { return currentIndex.load(); };
 	Track& getCurrentTrack();

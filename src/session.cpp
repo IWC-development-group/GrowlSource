@@ -4,6 +4,7 @@
 
 #include <print>
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 
 const char* connectionStatusString(ConnectionStatus status) {
@@ -141,6 +142,44 @@ void Session::playCurrent() {
 void Session::editTrack(int trackIndex, const Track& track) {
 	std::lock_guard<std::mutex> lock(worker.getMutex());
 	tracks[trackIndex] = track;
+}
+
+bool Session::loadPlaylistFromFile(const std::string& rawPath) {
+	std::string path = sconv::utf8ToCp1251(rawPath);
+	std::ifstream fin(path);
+
+	if (!fin) {
+		std::println(stderr, "Can't open playlist!");
+		return false;
+	}
+
+	std::lock_guard<std::mutex> lock(worker.getMutex());
+
+	std::string trackPath;
+	size_t i = 0, trackListSize = tracks.size();
+
+	while (std::getline(fin, trackPath)) {
+		if (trackPath.empty()) continue;
+		if (i < trackListSize) tracks[i] = Track(trackPath);
+		else tracks.emplace_back(trackPath);
+		i++;
+	}
+
+	fin.close();
+	return true;
+}
+
+void Session::savePlaylist(const std::string& rawPath) {
+	std::string path = sconv::utf8ToCp1251(rawPath);
+	std::ofstream fout(path);
+
+	std::lock_guard<std::mutex> lock(worker.getMutex());
+
+	for (const Track& track : tracks) {
+		fout << track.path << '\n';
+	}
+
+	fout.close();
 }
 
 Track& Session::getCurrentTrack() {

@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include <imfilebrowser.h>
 #include <GLFW/glfw3.h>
 #include <print>
 
@@ -22,6 +23,11 @@ public:
 class ConnectionEvent : public Event<const Connection&> {
 public:
 	ConnectionEvent() {}
+};
+
+class PlaylistManageEvent : public Event<ImGui::FileBrowser&> {
+public:
+	PlaylistManageEvent() {}
 };
 
 class DemoLayer final : public ILayer {
@@ -47,9 +53,11 @@ private:
 	TrackAddedEvent trackAdded;
 	TrackEditedEvent trackEdited;
 	ConnectionEvent clientConnects;
+	PlaylistManageEvent playlistSelected, playlistSaved;
 	Session& session;
 	Track track;
 	Connection connection;
+	ImGui::FileBrowser loadBrowser, saveBrowser;
 	int selectedIndex;
 
 	static void dropCallback(GLFWwindow* window, int pathCount, const char* paths[]) {
@@ -84,6 +92,20 @@ private:
 		}
 	}
 
+	void processErrorModal(const std::string& message) {
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing);
+		if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text(message.c_str());
+
+			if (ImGui::Button("OK")) {
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+
 public:
 	UiLayer(Session& _session, const TrackAddedEvent& added, const ConnectionEvent& connects)
 		: session(_session), selectedIndex(-1), trackAdded(added), clientConnects(connects) {
@@ -96,6 +118,18 @@ public:
 			session.editTrack(seletedIndex, track);
 		});
 
+		playlistSelected.onEvent([this](ImGui::FileBrowser& browser) {
+			bool loaded = session.loadPlaylistFromFile(browser.GetSelected().string());
+
+			if (!loaded) {
+				ImGui::OpenPopup("Error");
+			}
+		});
+
+		playlistSaved.onEvent([this](ImGui::FileBrowser& browser) {
+			session.savePlaylist(browser.GetSelected().string());
+		});
+
 		connection.ip = "26.70.26.159";
 		connection.port = 8000;
 		connection.mount = "/test.mp3";
@@ -104,6 +138,13 @@ public:
 
 		loadFont("fonts/terminus.ttf");
 		//ImGui::GetIO().Fonts->Build();
+
+		loadBrowser.SetTitle("Playlist selection");
+		loadBrowser.SetTypeFilters({ ".txt", ".gtl" });
+
+		saveBrowser = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
+		saveBrowser.SetTitle("Save playlist");
+		loadBrowser.SetTypeFilters({ ".txt", ".gtl" });
 	}
 
 	TrackAddedEvent& getTrackAddedEvent() { return trackAdded; }
@@ -113,13 +154,22 @@ public:
 	}
 
 	void showMenuBar() {
-		bool addTrackOpened = false, editTrackOpened = false;
+		bool addTrackOpened = false,
+			editTrackOpened = false,
+			fileBrowserOpenedToLoad = false,
+			fileBrowserOpenedToSave = false;
 
 		if (ImGui::BeginMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Add track")) addTrackOpened = true;
 				if (ImGui::MenuItem("Edit track", nullptr, false, selectedIndex != -1)) {
 					editTrackOpened = true;
+				}
+				if (ImGui::MenuItem("Save playlist")) {
+					fileBrowserOpenedToSave = true;
+				}
+				if (ImGui::MenuItem("Open playlist")) {
+					fileBrowserOpenedToLoad = true;
 				}
 				ImGui::EndMenu();
 			}
@@ -132,6 +182,24 @@ public:
 		if (editTrackOpened) {
 			track = session.getTrack(selectedIndex);
 			ImGui::OpenPopup("Edit track");
+		}
+		if (fileBrowserOpenedToLoad) {
+			loadBrowser.Open();
+		}
+		if (fileBrowserOpenedToSave) {
+			saveBrowser.Open();
+		}
+
+		loadBrowser.Display();
+		saveBrowser.Display();
+
+		if (loadBrowser.HasSelected()) {
+			playlistSelected.fire(loadBrowser);
+			loadBrowser.ClearSelected();
+		}
+		if (saveBrowser.HasSelected()) {
+			playlistSaved.fire(saveBrowser);
+			saveBrowser.ClearSelected();
 		}
 	}
 

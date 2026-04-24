@@ -6,6 +6,9 @@ struct Track {
 	std::string name;
 	std::string author;
 
+	Track() = default;
+	Track(const std::string& _path) : path(_path) {}
+
 	void clear();
 	std::string toString() const;
 };
