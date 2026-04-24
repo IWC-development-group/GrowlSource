@@ -26,7 +26,7 @@ Growl::Growl() : Application("Growl", 854, 480) {
 	events.add<"EVT_CONNECTION">(clientConnects);
 
 	gui = layers().attach<UiLayer>(session, trackAdded, clientConnects);
-	layers().attach<DemoLayer>();
+	//layers().attach<DemoLayer>();
 }
 
 void Growl::onUpdate() {

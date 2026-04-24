@@ -57,12 +57,12 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 
 	saveBrowser = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
 	saveBrowser.SetTitle("Save playlist");
+	saveBrowser.SetTypeFilters({ GR_PLAYLIST_EXTENSION });
 }
 
 void UiLayer::callPlaylistSave() {
 	if (currentPlaylistPath.empty()) saveBrowser.Open();
 	else events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SAVED">((void*)&saveBrowser);
-	std::println("Playlist saving called");
 }
 
 void UiLayer::callPlaylistSaveAs() {
@@ -166,7 +166,7 @@ void UiLayer::showMenuBar() {
 		loadBrowser.ClearSelected();
 	}
 	if (saveBrowser.HasSelected()) {
-		events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SAVED">((void*)&loadBrowser);
+		events.fire<PlaylistManageEvent, "EVT_PLAYLIST_SAVED">((void*)&saveBrowser);
 		saveBrowser.ClearSelected();
 	}
 }
