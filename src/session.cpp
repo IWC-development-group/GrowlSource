@@ -148,8 +148,7 @@ void Session::editTrack(int trackIndex, const Track& track) {
 }
 
 bool Session::loadPlaylistFromFile(const std::string& rawPath) {
-	std::string path = sconv::utf8ToCp1251(rawPath);
-	std::ifstream fin(path);
+	std::ifstream fin(rawPath);
 
 	if (!fin) {
 		std::println(stderr, "Can't open playlist!");
@@ -174,8 +173,7 @@ bool Session::loadPlaylistFromFile(const std::string& rawPath) {
 }
 
 void Session::savePlaylist(const std::string& rawPath) {
-	std::string path = sconv::utf8ToCp1251(rawPath);
-	std::ofstream fout(path);
+	std::ofstream fout(rawPath);
 
 	std::lock_guard<std::mutex> lock(worker.getMutex());
 
