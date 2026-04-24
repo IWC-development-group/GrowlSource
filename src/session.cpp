@@ -18,7 +18,10 @@ const char* connectionStatusString(ConnectionStatus status) {
 }
 
 Session::Session()
-	: currentIndex(0), shout(nullptr), connectionStatus(ConnectionStatus::DISCONNECTED) {
+	: currentIndex(0), shout(nullptr),
+	connectionStatus(ConnectionStatus::DISCONNECTED),
+	trackListNew(true) {
+
 	shout = shout_new();
 	if (!shout) {
 		std::cerr << "Failed to create shout_t\n";
@@ -158,13 +161,14 @@ bool Session::loadPlaylistFromFile(const std::string& rawPath) {
 	std::string trackPath;
 	size_t i = 0, trackListSize = tracks.size();
 
+	tracks.clear();
 	while (std::getline(fin, trackPath)) {
 		if (trackPath.empty()) continue;
-		if (i < trackListSize) tracks[i] = Track(trackPath);
-		else tracks.emplace_back(trackPath);
+		tracks.emplace_back(trackPath);
 		i++;
 	}
 
+	trackListNew.store(false);
 	fin.close();
 	return true;
 }

@@ -10,6 +10,8 @@
 #include "session.h"
 #include "instances.h"
 
+#define GR_PLAYLIST_EXTENSION		".gtl"
+
 class TrackAddedEvent : public Event<const Track&> {
 public:
 	TrackAddedEvent() {}
@@ -57,6 +59,7 @@ private:
 	Session& session;
 	Track track;
 	Connection connection;
+	std::string currentPlaylistPath;
 	ImGui::FileBrowser loadBrowser, saveBrowser;
 	int selectedIndex;
 
@@ -92,11 +95,11 @@ private:
 		}
 	}
 
-	void processErrorModal(const std::string& message) {
+	void processErrorModal() {
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing);
 		if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text(message.c_str());
+			ImGui::Text("Can't load playlist!");
 
 			if (ImGui::Button("OK")) {
 				ImGui::CloseCurrentPopup();
@@ -127,7 +130,11 @@ public:
 		});
 
 		playlistSaved.onEvent([this](ImGui::FileBrowser& browser) {
-			session.savePlaylist(browser.GetSelected().string());
+			if (browser.HasSelected()) {
+				currentPlaylistPath = browser.GetSelected().string() + GR_PLAYLIST_EXTENSION;
+			}
+
+			session.savePlaylist(currentPlaylistPath);
 		});
 
 		connection.ip = "26.70.26.159";
@@ -140,11 +147,10 @@ public:
 		//ImGui::GetIO().Fonts->Build();
 
 		loadBrowser.SetTitle("Playlist selection");
-		loadBrowser.SetTypeFilters({ ".txt", ".gtl" });
+		loadBrowser.SetTypeFilters({ GR_PLAYLIST_EXTENSION });
 
 		saveBrowser = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
 		saveBrowser.SetTitle("Save playlist");
-		loadBrowser.SetTypeFilters({ ".txt", ".gtl" });
 	}
 
 	TrackAddedEvent& getTrackAddedEvent() { return trackAdded; }
@@ -156,6 +162,7 @@ public:
 	void showMenuBar() {
 		bool addTrackOpened = false,
 			editTrackOpened = false,
+			currentPlaylistSaved = false,
 			fileBrowserOpenedToLoad = false,
 			fileBrowserOpenedToSave = false;
 
@@ -165,12 +172,9 @@ public:
 				if (ImGui::MenuItem("Edit track", nullptr, false, selectedIndex != -1)) {
 					editTrackOpened = true;
 				}
-				if (ImGui::MenuItem("Save playlist")) {
-					fileBrowserOpenedToSave = true;
-				}
-				if (ImGui::MenuItem("Open playlist")) {
-					fileBrowserOpenedToLoad = true;
-				}
+				if (ImGui::MenuItem("Save playlist")) currentPlaylistSaved = true;
+				if (ImGui::MenuItem("Save playlist as")) fileBrowserOpenedToSave = true;
+				if (ImGui::MenuItem("Open playlist")) fileBrowserOpenedToLoad = true;
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
@@ -182,6 +186,10 @@ public:
 		if (editTrackOpened) {
 			track = session.getTrack(selectedIndex);
 			ImGui::OpenPopup("Edit track");
+		}
+		if (currentPlaylistSaved) {
+			if (currentPlaylistPath.empty()) saveBrowser.Open();
+			else playlistSaved.fire(saveBrowser);
 		}
 		if (fileBrowserOpenedToLoad) {
 			loadBrowser.Open();
@@ -337,6 +345,7 @@ public:
 		}
 
 		showMenuBar();
+		processErrorModal();
 		processAdditionModal();
 		processEditModal();
 
