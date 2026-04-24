@@ -42,7 +42,7 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 	loadFont("fonts/terminus.ttf");
 	//ImGui::GetIO().Fonts->Build();
 
-	loadBrowser.SetTitle("Playlist selection");
+	loadBrowser.SetTitle("Load playlist");
 	loadBrowser.SetTypeFilters({ GR_PLAYLIST_EXTENSION });
 
 	saveBrowser = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
@@ -59,6 +59,10 @@ void UiLayer::callPlaylistSaveAs() {
 	saveBrowser.Open();
 }
 
+void UiLayer::callPlaylistOpen() {
+	loadBrowser.Open();
+}
+
 void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[]) {
 	TrackAddedEvent* event = (TrackAddedEvent*)glfwGetWindowUserPointer(window);
 
@@ -70,10 +74,16 @@ void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[
 }
 
 void UiLayer::hotkeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_S && action == GLFW_PRESS && (mods & GLFW_MOD_CONTROL)) {
+	if (mods & GLFW_MOD_CONTROL && action == GLFW_PRESS) {
 		UiLayer* layer = ((Growl*)Application::current())->getUiLayer();
-		if (mods & GLFW_MOD_SHIFT) layer->callPlaylistSaveAs();
-		else layer->callPlaylistSave();
+
+		if (key == GLFW_KEY_S) {
+			if (mods & GLFW_MOD_SHIFT) layer->callPlaylistSaveAs();
+			else layer->callPlaylistSave();
+		}
+		else if (key == GLFW_KEY_O) {
+			layer->callPlaylistOpen();
+		}
 	}
 }
 
@@ -128,7 +138,7 @@ void UiLayer::showMenuBar() {
 			}
 			if (ImGui::MenuItem("Save playlist", "Ctrl+S")) currentPlaylistSaved = true;
 			if (ImGui::MenuItem("Save playlist as", "Ctrl+Shift+S")) fileBrowserOpenedToSave = true;
-			if (ImGui::MenuItem("Open playlist")) fileBrowserOpenedToLoad = true;
+			if (ImGui::MenuItem("Open playlist", "Ctrl+O")) fileBrowserOpenedToLoad = true;
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
@@ -142,7 +152,7 @@ void UiLayer::showMenuBar() {
 		ImGui::OpenPopup("Edit track");
 	}
 	if (currentPlaylistSaved) callPlaylistSave();
-	if (fileBrowserOpenedToLoad) loadBrowser.Open();
+	if (fileBrowserOpenedToLoad) callPlaylistOpen();
 	if (fileBrowserOpenedToSave) callPlaylistSaveAs();
 
 	loadBrowser.Display();

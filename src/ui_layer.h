@@ -37,6 +37,7 @@ public:
 	void setCurrentTrack(Track& track) { this->track = track; }
 	void callPlaylistSave();
 	void callPlaylistSaveAs();
+	void callPlaylistOpen();
 
 	void showMenuBar();
 	void showTrackForm(Track& track);
