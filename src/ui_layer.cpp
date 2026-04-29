@@ -288,10 +288,12 @@ void UiLayer::onUpdate() {
 			ImGui::PushID(index);
 
 			bool isSelected = (index == selectedIndex);
+			std::string_view title = track.name.empty() ? track.path : track.name;
+
 			if (!isSelected && index == session.getCurrentTrackIndex()) {
-				ImGui::Selectable(track.path.c_str(), false, ImGuiSelectableFlags_Highlight);
+				ImGui::Selectable(title.data(), false, ImGuiSelectableFlags_Highlight);
 			}
-			else if (ImGui::Selectable(track.path.c_str(), isSelected)) {
+			else if (ImGui::Selectable(title.data(), isSelected)) {
 				selectedIndex = index;
 			}
 

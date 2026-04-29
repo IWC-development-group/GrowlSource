@@ -1,5 +1,45 @@
 #include "instances.h"
+#include "string_converting.h"
+
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <print>
 #include <format>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+Track::Track(const std::string& _path) : path(_path) {
+	std::string cp1251Path = sconv::utf8ToCp1251(path.c_str());
+
+	TagLib::FileRef file(cp1251Path.c_str());
+	if (file.isNull()) {
+		std::println(stderr, "Can't open or detect format: {}", cp1251Path);
+		return;
+	}
+
+	TagLib::Tag* tags = file.tag();
+	if (!tags) {
+		std::println(stderr, "File has no audio tags: {}", cp1251Path);
+		return;
+	}
+
+	TagLib::String title = tags->title();
+	TagLib::String artist = tags->artist();
+
+	if (!title.isEmpty()) {
+		const char* str = title.toCString(true);
+		name = str;
+	}
+	else {
+		name = std::filesystem::path(path).stem().string();
+	}
+
+	if (!artist.isEmpty()) {
+		const char* str = artist.toCString(true);
+		author = str;
+	}
+}
 
 void Track::clear() {
 	path.clear();

@@ -7,7 +7,7 @@ struct Track {
 	std::string author;
 
 	Track() = default;
-	Track(const std::string& _path) : path(_path) {}
+	Track(const std::string& _path);
 
 	void clear();
 	std::string toString() const;
