@@ -2,7 +2,7 @@
 #include <print>
 
 CommandWorker::CommandWorker()
-	: worker(&CommandWorker::job, this), running(false), processing(false) {
+	: worker(&CommandWorker::job, this), lastCompleted(UINT32_MAX), running(false), processing(false) {
 }
 
 CommandWorker::~CommandWorker() {
@@ -32,6 +32,7 @@ void CommandWorker::job() {
 				processing = true;
 				TaskStatus status = it->second(cmd.get());
 				if (status == TaskStatus::ERROR) clearQueue();
+				else lastCompleted.store(cmd->getType());
 				processing = false;
 			}
 		}

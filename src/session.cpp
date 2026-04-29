@@ -6,6 +6,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
+#include <algorithm>
+#include <numeric>
+#include <random>
 
 const char* connectionStatusString(ConnectionStatus status) {
 	switch (status) {
@@ -14,11 +17,12 @@ const char* connectionStatusString(ConnectionStatus status) {
 	case ConnectionStatus::CONNECTED: return "CONNECTED";
 	case ConnectionStatus::STREAMING: return "STREAMING";
 	case ConnectionStatus::FAILED: return "FAILED";
+	default: return "UNKNOWN";
 	}
 }
 
 Session::Session()
-	: currentIndex(0), shout(nullptr),
+	: currentIndex(0), currentTrackIndex(0), shout(nullptr),
 	connectionStatus(ConnectionStatus::DISCONNECTED),
 	trackListNew(true) {
 
@@ -40,6 +44,7 @@ Session::~Session() {
 void Session::addTrack(const Track& track) {
 	std::lock_guard<std::mutex> lock(worker.getMutex());
 	tracks.push_back(track);
+	trackIndicies.push_back(tracks.size() - 1);
 }
 
 void Session::setup() {
@@ -111,10 +116,19 @@ void Session::setup() {
 		std::lock_guard<std::mutex> lock(worker.getMutex());
 		
 		//std::println("Track list size: {}", tracks.size());
-		if (!tracks.empty()) {
-			currentIndex.store((currentIndex.load() + 1) % tracks.size()); // !!!
-		}
+		if (tracks.empty()) return TaskStatus::COMPLETED;
+		
+		if (isReshufflingNeeded() &&
+			worker.getLastCompleted() != CommandType::CMD_SHUFFLE) shuffleTracks(false);
+		currentIndex.store((currentIndex.load() + 1) % tracks.size()); // !!!
+		updateTrackIndex();
 
+		return TaskStatus::COMPLETED;
+	});
+
+	worker.onCommand<CMD_SHUFFLE, ShuffleTracksCommand>([this](ShuffleTracksCommand* command) -> TaskStatus {
+		std::lock_guard<std::mutex> lock(worker.getMutex());
+		shuffleTracks(false);
 		return TaskStatus::COMPLETED;
 	});
 
@@ -158,7 +172,7 @@ bool Session::loadPlaylistFromFile(const std::string& rawPath) {
 	std::lock_guard<std::mutex> lock(worker.getMutex());
 
 	std::string trackPath;
-	size_t i = 0, trackListSize = tracks.size();
+	size_t i = 0;
 
 	tracks.clear();
 	while (std::getline(fin, trackPath)) {
@@ -166,6 +180,11 @@ bool Session::loadPlaylistFromFile(const std::string& rawPath) {
 		tracks.emplace_back(trackPath);
 		i++;
 	}
+
+	if (tracks.size() <= currentIndex.load()) currentIndex.store(0);
+
+	trackIndicies.resize(tracks.size());
+	std::iota(trackIndicies.begin(), trackIndicies.end(), 0);
 
 	trackListNew.store(false);
 	fin.close();
@@ -184,6 +203,25 @@ void Session::savePlaylist(const std::string& rawPath) {
 	fout.close();
 }
 
+void Session::shuffleTracks(bool lock) {
+	std::println("Track list needs to be shuffled");
+
+	if (lock) worker.getMutex().lock();
+	std::iota(trackIndicies.begin(), trackIndicies.end(), 0);
+	std::minstd_rand random(std::random_device{}());
+	std::shuffle(trackIndicies.begin(), trackIndicies.end(), random);
+	updateTrackIndex();
+	if (lock) worker.getMutex().unlock();
+}
+
+bool Session::isReshufflingNeeded() {
+	return randomPlaybackEnabled.load() && currentIndex.load() >= tracks.size() - 1;
+}
+
+void Session::updateTrackIndex() {
+	currentTrackIndex.store(trackIndicies[currentIndex.load()]);
+}
+
 Track& Session::getCurrentTrack() {
     std::lock_guard<std::mutex> lock(worker.getMutex());
     
@@ -192,7 +230,8 @@ Track& Session::getCurrentTrack() {
         return empty;
     }
 
-    return tracks[currentIndex.load()];
+	int index = trackIndicies[currentIndex.load()];
+    return tracks[index];
 }
 
 Track& Session::getTrack(int trackIndex) {
@@ -219,9 +258,12 @@ FILE* Session::openTrack(const Track& track) {
 
 void Session::eachTrack(const std::function<void(int, Track&)>& func) {
 	std::lock_guard<std::mutex> lock(worker.getMutex());
-	for (int i = 0; i < tracks.size(); i++) {
-		func(i, tracks[i]);
-	}
+	for (int i = 0; i < tracks.size(); i++) func(i, tracks[i]);
+}
+
+void Session::eachShuffledTrack(const std::function<void(int, Track&)>& func) {
+	std::lock_guard<std::mutex> lock(worker.getMutex());
+	for (int index : trackIndicies) func(index, tracks[index]);
 }
 
 bool Session::isListEmpty() {

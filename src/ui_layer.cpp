@@ -9,7 +9,7 @@
 
 UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const ConnectionEvent& connects)
 	: events(((Growl*)Application::current())->getEventManager()),
-	session(_session), selectedIndex(-1) {
+	session(_session), selectedIndex(-1), shufflePlaylist(false) {
 
 	TrackAddedEvent trackAdded;
 	TrackEditedEvent trackEdited;
@@ -20,22 +20,28 @@ UiLayer::UiLayer(Session& _session, const TrackAddedEvent& added, const Connecti
 	//glfwSetWindowUserPointer(window, &trackAdded);
 	glfwSetDropCallback(window, dropCallback);
 
-
 	trackEdited.onEvent([this](int seletedIndex, const Track& track) {
 		session.editTrack(seletedIndex, track);
 	});
 
 	playlistSelected.onEvent([this](void* _browser) {
 		auto* browser = (ImGui::FileBrowser*)_browser;
+		currentPlaylistPath = browser->GetSelected().string();
 		bool loaded = session.loadPlaylistFromFile(browser->GetSelected().string());
 		if (!loaded) ImGui::OpenPopup("Error");
 	});
 
 	playlistSaved.onEvent([this](void* _browser) {
 		auto* browser = (ImGui::FileBrowser*)_browser;
+
 		if (browser->HasSelected()) {
-			currentPlaylistPath = browser->GetSelected().string() + GR_PLAYLIST_EXTENSION; // !!!
+			std::println("Current playlist path: {}", currentPlaylistPath);
+			currentPlaylistPath = browser->GetSelected().string();
+			if (!hasExtension(currentPlaylistPath, GR_PLAYLIST_EXTENSION)) {
+				currentPlaylistPath += GR_PLAYLIST_EXTENSION;
+			}
 		}
+
 		session.savePlaylist(currentPlaylistPath);
 	});
 
@@ -81,6 +87,17 @@ void UiLayer::dropCallback(GLFWwindow* window, int pathCount, const char* paths[
 		Track track(paths[i]);
 		event->fire(track);
 	}
+}
+
+bool UiLayer::hasExtension(const std::string& path, const std::string_view& extension) {
+	if (extension.size() > path.size()) return false;
+	int i = extension.size() - 1, j = path.size() - 1;
+
+	for (; i >= 0 && j >= 0; i--, j--) {
+		if (std::tolower(path[j]) != std::tolower(extension[i])) return false;
+	}
+
+	return true;
 }
 
 void UiLayer::loadFont(const std::string& filename) {
@@ -267,7 +284,7 @@ void UiLayer::onUpdate() {
 
 		ImGui::BeginChild("ScrollArea", ImVec2(avail.x, scrollHeight), true);
 
-		session.eachTrack([this](int index, Track& track) {
+		session.eachShuffledTrack([this](int index, Track& track) {
 			ImGui::PushID(index);
 
 			bool isSelected = (index == selectedIndex);
@@ -302,6 +319,16 @@ void UiLayer::onUpdate() {
 		ImGui::Text("Current track: %d", session.getCurrentTrackIndex());
 
 		ImGui::EndChild();
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+
+		static bool shufflingEnabled = session.isRandomPlaybackEnabled();
+		ImGui::Checkbox("Reshuffling", &shufflePlaylist);
+		if (shufflingEnabled != shufflePlaylist) {
+			events.fire<ShufflingSelectionEvent, "EVT_SHUFFLING_SELECTION">(shufflePlaylist);
+			shufflingEnabled = shufflePlaylist;
+		}
 	}
 
 	showMenuBar();

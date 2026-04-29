@@ -21,8 +21,10 @@ private:
 	std::string currentPlaylistPath;
 	ImGui::FileBrowser loadBrowser, saveBrowser;
 	int selectedIndex;
+	bool shufflePlaylist;
 
 	static void dropCallback(GLFWwindow* window, int pathCount, const char* paths[]);
+	static bool hasExtension(const std::string& path, const std::string_view& extension);
 	void loadFont(const std::string& filename);
 
 public:

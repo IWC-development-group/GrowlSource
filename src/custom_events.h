@@ -21,3 +21,8 @@ class PlaylistManageEvent : public Event<void*> {
 public:
 	PlaylistManageEvent() {}
 };
+
+class ShufflingSelectionEvent : public Event<bool> {
+public:
+	ShufflingSelectionEvent() {}
+};

@@ -32,6 +32,7 @@ class CommandWorker {
 private:
 	std::condition_variable condVar;
 	std::atomic_bool running;
+	std::atomic<uint32_t> lastCompleted;
 	bool processing;
 	mutable std::mutex mtx;
 	std::thread worker;
@@ -54,7 +55,9 @@ public:
 
 	bool isBusy() const;
 	bool isRunning() const;
+	bool isUsed() const { return lastCompleted.load() != UINT32_MAX; }
 
+	uint32_t getLastCompleted() const { return lastCompleted.load(); }
 	std::mutex& getMutex() { return mtx; }
 };
 

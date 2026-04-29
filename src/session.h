@@ -10,6 +10,7 @@ enum CommandType : uint32_t {
 	CMD_CONNECTION,
 	CMD_STREAM_TRACK,
 	CMD_NEXT_TRACK,
+	CMD_SHUFFLE,
 	CMD_TEST
 };
 
@@ -47,6 +48,12 @@ public:
 	int getTrackIndex() const { return trackIndex; }
 };
 
+class ShuffleTracksCommand : public Command {
+private:
+public:
+	ShuffleTracksCommand() : Command(CMD_SHUFFLE) {}
+};
+
 enum class ConnectionStatus : uint8_t {
 	DISCONNECTED,
 	CONNECTING,
@@ -61,10 +68,14 @@ class Session {
 private:
 	CommandWorker worker;
 	std::vector<Track> tracks; // !!!
+	std::vector<int> trackIndicies;
 	shout_t* shout; // !!!
-	std::atomic<int> currentIndex;
+	std::atomic<int> currentIndex, currentTrackIndex;
 	std::atomic<ConnectionStatus> connectionStatus;
-	std::atomic<bool> playRequested, trackListNew;
+	std::atomic<bool> playRequested, trackListNew, randomPlaybackEnabled;
+
+	bool isReshufflingNeeded();
+	void updateTrackIndex();
 
 public:
 	Session();
@@ -78,11 +89,14 @@ public:
 	void editTrack(int trackIndex, const Track& track);
 	void setup();
 	void eachTrack(const std::function<void(int, Track&)>& func);
-	void setPlayRequested(bool playRequested) { return this->playRequested.store(playRequested); }
+	void eachShuffledTrack(const std::function<void(int, Track&)>& func);
+	void setPlayRequested(bool playRequested) { this->playRequested.store(playRequested); }
+	void setRandomPlaybackEnabled(bool randomPlaybackEnabled) { this->randomPlaybackEnabled.store(randomPlaybackEnabled); }
 	bool loadPlaylistFromFile(const std::string& path);
 	void savePlaylist(const std::string& path);
+	void shuffleTracks(bool lock);
 
-	int getCurrentTrackIndex() const { return currentIndex.load(); };
+	int getCurrentTrackIndex() const { return currentTrackIndex.load(); }
 	Track& getCurrentTrack();
 	Track& getTrack(int trackIndex);
 	CommandWorker& getWorker() { return worker; }
@@ -91,5 +105,6 @@ public:
 	bool isOnFirstTrack() const { return currentIndex == 0; }
 	bool isPlayRequested() const { return playRequested.load(); }
 	bool isTrackListNew() const { return trackListNew.load(); }
+	bool isRandomPlaybackEnabled() const { return randomPlaybackEnabled.load(); }
 	ConnectionStatus getConnectionStatus() const { return connectionStatus.load(); }
 };
