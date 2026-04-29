@@ -1,7 +1,7 @@
 #pragma once
 #include <any>
 #include <unordered_map>
-#include "light_sid/sid.h"
+#include "lsid/lsid.h"
 
 class EventManager {
 private:
@@ -12,13 +12,13 @@ public:
 
 	template <lsid::StringLiteral Name, typename EventT>
 	void add(const EventT& event) {
-		uint32_t id = lsid::Sid<Name>{}.value();
+		uint32_t id = lsid::Ssid<Name>{}.value();
 		eventTable[id] = event;
 	}
 
 	template <typename EventT, lsid::StringLiteral Name>
 	EventT* get() {
-		auto it = eventTable.find(lsid::Sid<Name>{}.value());
+		auto it = eventTable.find(lsid::Ssid<Name>{}.value());
 		return std::any_cast<EventT>(&it->second);
 	}
 
