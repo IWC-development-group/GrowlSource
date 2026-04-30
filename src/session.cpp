@@ -207,10 +207,14 @@ void Session::shuffleTracks(bool lock) {
 	std::println("Track list needs to be shuffled");
 
 	if (lock) worker.getMutex().lock();
-	std::iota(trackIndicies.begin(), trackIndicies.end(), 0);
-	std::minstd_rand random(std::random_device{}());
-	std::shuffle(trackIndicies.begin(), trackIndicies.end(), random);
-	updateTrackIndex();
+
+	if (!trackIndicies.empty()) {
+		std::iota(trackIndicies.begin(), trackIndicies.end(), 0);
+		std::minstd_rand random(std::random_device{}());
+		std::shuffle(trackIndicies.begin(), trackIndicies.end(), random);
+		updateTrackIndex();
+	}
+
 	if (lock) worker.getMutex().unlock();
 }
 

@@ -27,18 +27,10 @@ Track::Track(const std::string& _path) : path(_path) {
 	TagLib::String title = tags->title();
 	TagLib::String artist = tags->artist();
 
-	if (!title.isEmpty()) {
-		const char* str = title.toCString(true);
-		name = str;
-	}
-	else {
-		name = std::filesystem::path(path).stem().string();
-	}
+	if (!title.isEmpty()) name = title.toCString(true);
+	else name = std::filesystem::path(path).stem().string();
 
-	if (!artist.isEmpty()) {
-		const char* str = artist.toCString(true);
-		author = str;
-	}
+	if (!artist.isEmpty()) author = artist.toCString(true);
 }
 
 void Track::clear() {
